@@ -1,3 +1,4 @@
 FROM ghcr.io/coqui-ai/tts-cpu
 EXPOSE 5002
+COPY ./server.py /root/TTS/server/server.py
 ENTRYPOINT ["python3", "TTS/server/server.py", "--model_name","tts_models/en/vctk/vits"]
