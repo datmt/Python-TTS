@@ -101,7 +101,7 @@ if args.vocoder_path is not None:
     vocoder_config_path = args.vocoder_config_path
 
 # load models
-synthesizer = Synthesizer(
+synthesizer1 = Synthesizer(
     tts_checkpoint=model_path,
     tts_config_path=config_path,
     tts_speakers_file=speakers_file_path,
@@ -113,18 +113,20 @@ synthesizer = Synthesizer(
     use_cuda=args.use_cuda,
 )
 
-use_multi_speaker = hasattr(synthesizer.tts_model, "num_speakers") and (
-    synthesizer.tts_model.num_speakers > 1 or synthesizer.tts_speakers_file is not None
-)
-speaker_manager = getattr(synthesizer.tts_model, "speaker_manager", None)
+# load models
 
-use_multi_language = hasattr(synthesizer.tts_model, "num_languages") and (
-    synthesizer.tts_model.num_languages > 1 or synthesizer.tts_languages_file is not None
+use_multi_speaker = hasattr(synthesizer1.tts_model, "num_speakers") and (
+        synthesizer1.tts_model.num_speakers > 1 or synthesizer1.tts_speakers_file is not None
 )
-language_manager = getattr(synthesizer.tts_model, "language_manager", None)
+speaker_manager = getattr(synthesizer1.tts_model, "speaker_manager", None)
+
+use_multi_language = hasattr(synthesizer1.tts_model, "num_languages") and (
+        synthesizer1.tts_model.num_languages > 1 or synthesizer1.tts_languages_file is not None
+)
+language_manager = getattr(synthesizer1.tts_model, "language_manager", None)
 
 # TODO: set this from SpeakerManager
-use_gst = synthesizer.tts_config.get("use_gst", False)
+use_gst = synthesizer1.tts_config.get("use_gst", False)
 app = Flask(__name__)
 
 
@@ -191,10 +193,35 @@ def tts():
         print(f" > Model input: {text}")
         print(f" > Speaker Idx: {speaker_idx}")
         print(f" > Language Idx: {language_idx}")
-        wavs = synthesizer.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
+        wavs = synthesizer1.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
         out = io.BytesIO()
-        synthesizer.save_wav(wavs, out)
+        synthesizer1.save_wav(wavs, out)
     return send_file(out, mimetype="audio/wav")
+
+
+@app.route("/api/convo", methods=["POST"])
+def tts_convo():
+    with lock:
+        data = request.json
+        style_wav = data['style_wav']
+        language_idx = data['language_id']
+        convo = data['convo']
+
+        style_wav = style_wav_uri_to_dict(style_wav)
+        final_wavs = []
+        for item in convo:
+            speaker_idx = item['speaker_id']
+            text = item['content']
+            wav_temp = render_wav(speaker_idx, language_idx, style_wav, text)
+            final_wavs.extend(wav_temp)
+        out = io.BytesIO()
+        synthesizer1.save_wav(final_wavs, out)
+    return send_file(out, mimetype="audio/wav")
+
+
+def render_wav(speaker_name, language_name, style_wav, text):
+    with lock:
+        return synthesizer1.tts(text, speaker_name=speaker_name, language_name=language_name, style_wav=style_wav)
 
 
 # Basic MaryTTS compatibility layer
@@ -224,6 +251,16 @@ def mary_tts_api_voices():
     )
 
 
+@app.route("/convo", methods=["POST"])
+def convo_tts():
+    """Conversation"""
+    with lock:
+        """MaryTTS-compatible /process endpoint"""
+        """Conversation. data passed in as JSON in the following format"""
+        """[{"speaker": "person1", "content": "content"}, {"speaker" : "person2", "content": "content"}]"""
+        """Different synthesizer models can be used for different speakers"""
+
+
 @app.route("/process", methods=["GET", "POST"])
 def mary_tts_api_process():
     """MaryTTS-compatible /process endpoint"""
@@ -235,9 +272,9 @@ def mary_tts_api_process():
         else:
             text = request.args.get("INPUT_TEXT", "")
         print(f" > Model input: {text}")
-        wavs = synthesizer.tts(text)
+        wavs = synthesizer1.tts(text)
         out = io.BytesIO()
-        synthesizer.save_wav(wavs, out)
+        synthesizer1.save_wav(wavs, out)
     return send_file(out, mimetype="audio/wav")
 
 
