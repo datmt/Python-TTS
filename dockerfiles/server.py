@@ -203,6 +203,7 @@ def tts():
 def tts_convo():
     with lock:
         data = request.json
+        print("got the data: ", str(data))
         style_wav = data['style_wav']
         language_idx = data['language_id']
         convo = data['convo']
@@ -212,9 +213,12 @@ def tts_convo():
         for item in convo:
             speaker_idx = item['speaker_id']
             text = item['content']
+            print(f" > Model input: {text}")
+            print(f" > Speaker Idx: {speaker_idx}")
             wav_temp = render_wav(speaker_idx, language_idx, style_wav, text)
             final_wavs.extend(wav_temp)
         out = io.BytesIO()
+        print("processing done. Save to file")
         synthesizer1.save_wav(final_wavs, out)
     return send_file(out, mimetype="audio/wav")
 
