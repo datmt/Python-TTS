@@ -224,8 +224,7 @@ def tts_convo():
 
 
 def render_wav(speaker_name, language_name, style_wav, text):
-    with lock:
-        return synthesizer1.tts(text, speaker_name=speaker_name, language_name=language_name, style_wav=style_wav)
+  return synthesizer1.tts(text, speaker_name=speaker_name, language_name=language_name, style_wav=style_wav)
 
 
 # Basic MaryTTS compatibility layer
