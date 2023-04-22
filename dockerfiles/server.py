@@ -184,10 +184,10 @@ lock = Lock()
 
 @app.route("/api/tts", methods=["POST"])
 def tts_post():
+    data = request.json
+    print("got the data: ", str(data))
     with lock:
-        data = request.json
         text = data['text']
-        print("got the data: ", str(data))
         speaker_idx = data.get('speaker_id', "")
         language_idx = data.get('language_id', "")
         style_wav = data.get("style_wav", "")
@@ -200,9 +200,9 @@ def tts_post():
 
 @app.route("/api/convo", methods=["POST"])
 def tts_convo():
+    data = request.json
+    print("got the data: ", str(data))
     with lock:
-        data = request.json
-        print("got the data: ", str(data))
         style_wav = data['style_wav']
         language_idx = data['language_id']
         convo = data['convo']
