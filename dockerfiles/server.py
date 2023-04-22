@@ -182,22 +182,6 @@ def details():
 lock = Lock()
 
 
-@app.route("/api/tts", methods=["GET"])
-def tts():
-    with lock:
-        text = request.args.get("text")
-        speaker_idx = request.args.get("speaker_id", "")
-        language_idx = request.args.get("language_id", "")
-        style_wav = request.args.get("style_wav", "")
-        style_wav = style_wav_uri_to_dict(style_wav)
-        print(f" > Model input: {text}")
-        print(f" > Speaker Idx: {speaker_idx}")
-        print(f" > Language Idx: {language_idx}")
-        wavs = synthesizer1.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
-        out = io.BytesIO()
-        synthesizer1.save_wav(wavs, out)
-    return send_file(out, mimetype="audio/wav")
-
 @app.route("/api/tts", methods=["POST"])
 def tts_post():
     with lock:
@@ -211,6 +195,7 @@ def tts_post():
         out = io.BytesIO()
         synthesizer1.save_wav(wavs, out)
     return send_file(out, mimetype="audio/wav")
+
 
 @app.route("/api/convo", methods=["POST"])
 def tts_convo():
@@ -237,7 +222,7 @@ def tts_convo():
 
 
 def render_wav(speaker_name, language_name, style_wav, text):
-  return synthesizer1.tts(text, speaker_name=speaker_name, language_name=language_name, style_wav=style_wav)
+    return synthesizer1.tts(text, speaker_name=speaker_name, language_name=language_name, style_wav=style_wav)
 
 
 # Basic MaryTTS compatibility layer
