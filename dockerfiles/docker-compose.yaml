@@ -3,12 +3,21 @@ version: '3'
 services:
   multi-tts:
     image: multi-tts
+    container_name: multi-tts
     ports:
-      - 15002:5002
+      - "15002:5002"
     restart: always
 
   single-tts:
     image: single-tts
+    container_name: single-tts
     ports:
-      - 15003:5002
+      - "15003:5002"
+    restart: always
+
+  whisper:
+    container_name: whisper
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    ports:
+      - "15004:9000"
     restart: always
