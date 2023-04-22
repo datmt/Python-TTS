@@ -198,6 +198,19 @@ def tts():
         synthesizer1.save_wav(wavs, out)
     return send_file(out, mimetype="audio/wav")
 
+@app.route("/api/tts", methods=["POST"])
+def tts_post():
+    with lock:
+        data = request.json
+        text = data['text']
+        speaker_idx = data.get('speaker_id', "")
+        language_idx = data.get('language_id', "")
+        style_wav = data.get("style_wav", "")
+        style_wav = style_wav_uri_to_dict(style_wav)
+        wavs = synthesizer1.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
+        out = io.BytesIO()
+        synthesizer1.save_wav(wavs, out)
+    return send_file(out, mimetype="audio/wav")
 
 @app.route("/api/convo", methods=["POST"])
 def tts_convo():
