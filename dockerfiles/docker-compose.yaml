@@ -4,6 +4,8 @@ services:
   multi-tts:
     image: multi-tts
     container_name: multi-tts
+    volumes:
+      - ./models:/root/.local/share/tts
     ports:
       - "15002:5002"
     restart: always
@@ -11,6 +13,8 @@ services:
   single-tts:
     image: single-tts
     container_name: single-tts
+    volumes:
+      - ./models:/root/.local/share/tts
     ports:
       - "15003:5002"
     restart: always
