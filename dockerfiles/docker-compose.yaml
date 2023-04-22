@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  multi-tts:
+    image: multi-tts
+    ports:
+      - 15002:5002
+    restart: always
+
+  single-tts:
+    image: single-tts
+    ports:
+      - 15003:5002
+    restart: always
