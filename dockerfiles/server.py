@@ -187,6 +187,7 @@ def tts_post():
     with lock:
         data = request.json
         text = data['text']
+        print("got the data: ", str(data))
         speaker_idx = data.get('speaker_id', "")
         language_idx = data.get('language_id', "")
         style_wav = data.get("style_wav", "")
