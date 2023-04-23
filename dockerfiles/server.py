@@ -181,6 +181,22 @@ def details():
 
 lock = Lock()
 
+@app.route("/api/tts", methods=["GET"])
+def tts():
+    with lock:
+        text = request.args.get("text")
+        speaker_idx = request.args.get("speaker_id", "")
+        language_idx = request.args.get("language_id", "")
+        style_wav = request.args.get("style_wav", "")
+        style_wav = style_wav_uri_to_dict(style_wav)
+        print(f" > Model input: {text}")
+        print(f" > Speaker Idx: {speaker_idx}")
+        print(f" > Language Idx: {language_idx}")
+        wavs = synthesizer1.tts(text, speaker_name=speaker_idx, language_name=language_idx, style_wav=style_wav)
+        out = io.BytesIO()
+        synthesizer1.save_wav(wavs, out)
+    return send_file(out, mimetype="audio/wav")
+
 
 @app.route("/api/tts", methods=["POST"])
 def tts_post():
@@ -251,16 +267,6 @@ def mary_tts_api_voices():
     return render_template_string(
         "{{ name }} {{ locale }} {{ gender }}\n", name=model_details[3], locale=model_details[1], gender="u"
     )
-
-
-@app.route("/convo", methods=["POST"])
-def convo_tts():
-    """Conversation"""
-    with lock:
-        """MaryTTS-compatible /process endpoint"""
-        """Conversation. data passed in as JSON in the following format"""
-        """[{"speaker": "person1", "content": "content"}, {"speaker" : "person2", "content": "content"}]"""
-        """Different synthesizer models can be used for different speakers"""
 
 
 @app.route("/process", methods=["GET", "POST"])
