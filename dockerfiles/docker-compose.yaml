@@ -21,7 +21,7 @@ services:
 
   whisper:
     container_name: whisper
-    image: onerahmet/openai-whisper-asr-webservice:latest
+    image: datmt-whisper
     ports:
       - "15004:9000"
     restart: always
